@@ -5,42 +5,56 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     private Rigidbody rb;
-    public float jumpForce = 7f;
-    public float moveSpeed = 2.5f;
-
+    public float jumpForce = 112f;
+    public float  groundCheckDistance = 0.3f;
+    private bool isGrounded = false;
+    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
     }
 
+    // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Physics.Raycast((transform.position + Vector3.up * 0.1f), Vector3.down, groundCheckDistance))
         {
-            Jump(Vector3.forward);
+            isGrounded = true;
         }
-        else if (Input.GetKeyDown(KeyCode.S))
+        else
         {
-            Jump(Vector3.back);
-        }
-        else if (Input.GetKeyDown(KeyCode.A))
-        {
-            Jump(Vector3.left);
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            Jump(Vector3.right);
+            isGrounded = false;
         }
 
-        // Movimiento continuo hacia adelante
-        rb.velocity = transform.forward * moveSpeed;
+        if  (isGrounded)
+        {
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                AdjustPositionAndRotation(new Vector3(0, 0, 0));
+                rb.AddForce(new Vector3(0, jumpForce, jumpForce));
+            }
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                AdjustPositionAndRotation(new Vector3(0, 180, 0));
+                rb.AddForce(new Vector3(0, jumpForce, -jumpForce));
+            }
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                AdjustPositionAndRotation(new Vector3(0, -90, 0));
+                rb.AddForce(new Vector3(-jumpForce, jumpForce, 0));
+            }
+            if (Input.GetKeyDown(KeyCode.D))
+            {
+                AdjustPositionAndRotation(new Vector3(0, 90, 0));
+                rb.AddForce(new Vector3(jumpForce, jumpForce, 0));
+            }
+        }
     }
 
-    void Jump(Vector3 direction)
+    void AdjustPositionAndRotation(Vector3 newRotation)
     {
-        // Reiniciar la velocidad vertical antes de aplicar la fuerza del salto
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        // Aplicar fuerza de salto en la dirección especificada
-        rb.AddForce(direction * jumpForce, ForceMode.Impulse);
+        rb.velocity = Vector3.zero;
+        transform.eulerAngles = newRotation;
+        transform.position = new Vector3(transform.position.x, transform.position.y, Mathf.Round(transform.position.z));
     }
 }
