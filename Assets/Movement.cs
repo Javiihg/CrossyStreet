@@ -4,18 +4,19 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
-        public int carril;
-        public int lateral;
-        public Vector3 posObjetivo;
-        public int posicionZ;
-        public float posicionYInicial = 0.51f;
-        public int saltoDistancia = 2;
-        public Mundo mundo;
+     public int carril;
+     public int lateral;
+     public Vector3 posObjetivo;
+     public float velocidad;
+     public Mundo mundo;
+
+     int posicionZ;
 
     void Start()
     {
-        transform.position = new Vector3(transform.position.x, posicionYInicial, transform.position.z);
+        
     }
+
     void Update()
     {
         ActualizarPosicion();
@@ -24,17 +25,14 @@ public class Movement : MonoBehaviour
         {
             Avanzar();
         }
-
         else if (Input.GetKeyDown(KeyCode.S))
         {
             Retroceder();
         }
-
-        else if (Input.GetKeyDown(KeyCode.D))
+        else if(Input.GetKeyDown(KeyCode.D))
         {
             MoverLados(1);
         }
-
         else if (Input.GetKeyDown(KeyCode.A))
         {
             MoverLados(-1);
@@ -43,14 +41,13 @@ public class Movement : MonoBehaviour
 
     public void ActualizarPosicion()
     {
-        posObjetivo = new Vector3 (lateral, posicionYInicial, posicionZ);
+        posObjetivo = new Vector3(lateral, 0, posicionZ);
         transform.position = posObjetivo;
     }
 
     public void Avanzar()
     {
-        posicionZ += saltoDistancia;
-
+        posicionZ++;
         if (posicionZ > carril)
         {
             carril = posicionZ;
@@ -60,14 +57,14 @@ public class Movement : MonoBehaviour
 
     public void Retroceder()
     {
+        if (posicionZ > carril - 3)
         {
-            posicionZ -= saltoDistancia;
+            posicionZ--;
         }
     }
-
     public void MoverLados(int cuanto)
     {
         lateral += cuanto;
-        lateral = Mathf.Clamp(lateral, -12, 5);
+        lateral = Mathf.Clamp(lateral, -5, 5);
     }
 }
