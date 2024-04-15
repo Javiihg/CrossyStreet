@@ -47,6 +47,7 @@ public class Movement : MonoBehaviour
 
     public void Avanzar()
     {
+
         posicionZ++;
         if (posicionZ > carril)
         {
