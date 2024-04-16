@@ -493,6 +493,7 @@ MonoBehaviour:
   - {fileID: 7180984190168738094, guid: fbbb7188a2207f848b91b1f2df621af0, type: 3}
   - {fileID: 7180984190168738094, guid: 9bc66a1bca897c14186cfd75a4a85953, type: 3}
   - {fileID: 7180984190168738094, guid: e9ab62649060e03439d8da3d13361b67, type: 3}
+  - {fileID: 7974053567023868226, guid: 17ae1560a69118a45b83408bff62ffa1, type: 3}
   pisosDiferencia: 10
   longitudPiso: 10
 --- !u!4 &1646145788
