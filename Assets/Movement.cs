@@ -12,6 +12,8 @@ public class Movement : MonoBehaviour
      public int distanciaSaltoZ = 4;
      public int distanciaSaltoLateral = 4;
      public Transform grafico;
+     public LayerMask capaObstacles;
+     public float distanciaVista = 5;
 
      int posicionZ;
 
@@ -42,6 +44,12 @@ public class Movement : MonoBehaviour
         }
     }
 
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(grafico.position + Vector3.up * 5f, grafico.position + Vector3.up * 5f + grafico.forward * distanciaVista);
+    }
+
     public void ActualizarPosicion()
     {
         posObjetivo = new Vector3(lateral, 0, posicionZ);
@@ -51,6 +59,10 @@ public class Movement : MonoBehaviour
     public void Avanzar()
     {
         grafico.eulerAngles = Vector3.zero;
+        if (MirarAdelante())
+        {
+            return;
+        }
 
         posicionZ += distanciaSaltoZ;
         if (posicionZ > carril)
@@ -63,6 +75,10 @@ public class Movement : MonoBehaviour
     public void Retroceder()
     {
         grafico.eulerAngles = new Vector3(0, 180, 0);
+        if (MirarAdelante())
+        {
+            return;
+        }
 
         if (posicionZ > carril - 3 * distanciaSaltoZ)
         {
@@ -72,8 +88,24 @@ public class Movement : MonoBehaviour
     public void MoverLados(int cuanto)
     {
         grafico.rotation = Quaternion.Euler(0, 90 * Mathf.Sign(cuanto), 0);
+        if (MirarAdelante())
+        {
+            return;
+        }
 
         lateral += cuanto;
-        lateral = Mathf.Clamp(lateral, -10, 10);
+        lateral = Mathf.Clamp(lateral, -15, 15);
+    }
+
+    public bool MirarAdelante()
+    {
+        RaycastHit hit;
+        Ray rayo = new Ray(grafico.position + Vector3.up * 5f, grafico.forward);
+
+        if (Physics.Raycast(rayo, out hit, distanciaVista, capaObstacles))
+        {
+            return true;
+        }
+        return false;
     }
 }
