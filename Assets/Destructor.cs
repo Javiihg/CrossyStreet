@@ -5,6 +5,6 @@ using UnityEngine;
 public class Destructor : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other) {
-        Destroy(other.gameObject);
+        Destroy(other.transform.parent.gameObject);
     }
 }
