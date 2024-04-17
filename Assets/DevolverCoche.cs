@@ -6,9 +6,9 @@ public class DevolverCoche : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Coche"))
+        if (other.CompareTag("Coche") || other.CompareTag("Tronco"))
         {
-            other.transform.Translate(0, 0, -60);
+            other.transform.Translate(0, 0, -80);
         }
     }
 }

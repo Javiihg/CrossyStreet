@@ -408,7 +408,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 25
+  orthographic size: 26
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -490,10 +490,13 @@ MonoBehaviour:
   - {fileID: 7180984190168738094, guid: d429446418fc5c54cbfa2330f2d23d61, type: 3}
   - {fileID: 1642070835218746852, guid: b94dd935736178a4489937a492d674f1, type: 3}
   - {fileID: 7974053567023868226, guid: 17ae1560a69118a45b83408bff62ffa1, type: 3}
+  - {fileID: 7974053567023868226, guid: edf03dc40dc38f04c9de928f63fdb91d, type: 3}
+  - {fileID: 7974053567023868226, guid: 9dea371dc5a64c043a120a151473540c, type: 3}
   - {fileID: 7180984190168738094, guid: fbbb7188a2207f848b91b1f2df621af0, type: 3}
   - {fileID: 7180984190168738094, guid: 9bc66a1bca897c14186cfd75a4a85953, type: 3}
   - {fileID: 7180984190168738094, guid: e9ab62649060e03439d8da3d13361b67, type: 3}
-  - {fileID: 7974053567023868226, guid: 17ae1560a69118a45b83408bff62ffa1, type: 3}
+  - {fileID: 1642070835218746852, guid: d63e592981dbd3f438d2e01b4a01f48b, type: 3}
+  - {fileID: 1642070835218746852, guid: d63e592981dbd3f438d2e01b4a01f48b, type: 3}
   pisosDiferencia: 10
   longitudPiso: 10
 --- !u!4 &1646145788
@@ -620,7 +623,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -649,9 +652,9 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 112
+  m_Constraints: 126
   m_CollisionDetection: 0
 --- !u!114 &1915748890
 MonoBehaviour:
@@ -676,7 +679,11 @@ MonoBehaviour:
   capaObstacles:
     serializedVersion: 2
     m_Bits: 64
+  capaAgua:
+    serializedVersion: 2
+    m_Bits: 16
   distanciaVista: 6
+  vivo: 1
 --- !u!1 &1932196979
 GameObject:
   m_ObjectHideFlags: 0
@@ -1097,7 +1104,7 @@ Transform:
   m_GameObject: {fileID: 838246064574945717}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -5.1}
+  m_LocalPosition: {x: 0, y: 0, z: -5}
   m_LocalScale: {x: 100, y: 0.2, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []

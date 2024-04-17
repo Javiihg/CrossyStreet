@@ -13,13 +13,16 @@ public class Movement : MonoBehaviour
      public int distanciaSaltoLateral = 4;
      public Transform grafico;
      public LayerMask capaObstacles;
+     public LayerMask capaAgua;
      public float distanciaVista = 5;
+     public bool vivo = true;
 
      int posicionZ;
 
     void Start()
     {
         distanciaSaltoLateral = distanciaSaltoZ;
+        InvokeRepeating("MirarAbajo", 1, 0.5f);
     }
 
     void Update()
@@ -52,12 +55,20 @@ public class Movement : MonoBehaviour
 
     public void ActualizarPosicion()
     {
+        if (!vivo)
+        {
+            return;
+        }
         posObjetivo = new Vector3(lateral, 0, posicionZ);
         transform.position = posObjetivo;
     }
 
     public void Avanzar()
     {
+        if (!vivo)
+        {
+            return;
+        }
         grafico.eulerAngles = Vector3.zero;
         if (MirarAdelante())
         {
@@ -74,6 +85,10 @@ public class Movement : MonoBehaviour
 
     public void Retroceder()
     {
+        if (!vivo)
+        {
+            return;
+        }
         grafico.eulerAngles = new Vector3(0, 180, 0);
         if (MirarAdelante())
         {
@@ -87,6 +102,10 @@ public class Movement : MonoBehaviour
     }
     public void MoverLados(int cuanto)
     {
+        if (!vivo)
+        {
+            return;
+        }
         grafico.rotation = Quaternion.Euler(0, 90 * Mathf.Sign(cuanto), 0);
         if (MirarAdelante())
         {
@@ -107,5 +126,27 @@ public class Movement : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Coche"))
+        {
+            vivo = false;
+        }
+    }
+
+    public void MirarAbajo()
+    {
+        RaycastHit hit;
+        Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
+
+        if (Physics.Raycast(rayo, out hit, 3, capaAgua))
+        {
+            if (hit.collider.CompareTag("Agua"))
+            {
+                vivo = false;
+            }
+        }
     }
 }

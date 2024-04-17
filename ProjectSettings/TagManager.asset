@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Coche
+  - Agua
+  - Tronco
   layers:
   - Default
   - TransparentFX
