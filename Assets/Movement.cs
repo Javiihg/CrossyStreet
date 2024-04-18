@@ -5,19 +5,24 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
      public int carril;
-     public int lateral;
-     public Vector3 posObjetivo;
-     public float velocidad;
-     public Mundo mundo;
-     public int distanciaSaltoZ = 4;
-     public int distanciaSaltoLateral = 4;
-     public Transform grafico;
-     public LayerMask capaObstacles;
-     public LayerMask capaAgua;
-     public float distanciaVista = 5;
-     public bool vivo = true;
+    public int lateral;
+    public Vector3 posObjetivo;
+    public float velocidad;
+    public Mundo mundo;
+    public int distanciaSaltoZ = 4;
+    public int distanciaSaltoLateral = 4;
+    public Transform grafico;
+    public LayerMask capaObstacles;
+    public LayerMask capaAgua;
+    public float distanciaVista = 5;
+    public bool vivo = true;
 
-     int posicionZ;
+    private Vector2 touchStartPos;
+    private Vector2 touchEndPos;
+    private bool isSwiping = false;
+    private float minSwipeDistance = 50f; // La distancia mínima para considerar un movimiento como un deslizamiento
+    private int posicionZ;
+    public int pasos = 0;
 
     void Start()
     {
@@ -27,8 +32,11 @@ public class Movement : MonoBehaviour
 
     void Update()
     {
+        if (!vivo) return;
+
         ActualizarPosicion();
 
+        // Teclas de movimiento
         if (Input.GetKeyDown(KeyCode.W))
         {
             Avanzar();
@@ -45,108 +53,132 @@ public class Movement : MonoBehaviour
         {
             MoverLados(-distanciaSaltoLateral);
         }
+
+        // Detección de deslizamiento del ratón
+        if (Input.GetMouseButtonDown(0))
+        {
+            touchStartPos = Input.mousePosition;
+            isSwiping = true;
+        }
+
+        if (Input.GetMouseButtonUp(0) && isSwiping)
+        {
+            touchEndPos = Input.mousePosition;
+            ProcesarSwipe();
+            isSwiping = false;
+        }
     }
 
     void OnDrawGizmos()
+{
+    Gizmos.color = Color.green;
+    Gizmos.DrawLine(grafico.position + Vector3.up * 5f, grafico.position + Vector3.up * 5f + grafico.forward * distanciaVista);
+}
+
+    private void ProcesarSwipe()
     {
-        Gizmos.color = Color.green;
-        Gizmos.DrawLine(grafico.position + Vector3.up * 5f, grafico.position + Vector3.up * 5f + grafico.forward * distanciaVista);
+        Vector2 swipeDelta = touchEndPos - touchStartPos;
+        if (swipeDelta.magnitude > minSwipeDistance)
+        {
+            if (Mathf.Abs(swipeDelta.x) > Mathf.Abs(swipeDelta.y))
+            {
+                // Deslizamiento lateral
+                MoverLados(Mathf.RoundToInt(Mathf.Sign(swipeDelta.x) * distanciaSaltoLateral));
+            }
+            else
+            {
+                // Deslizamiento vertical
+                if (swipeDelta.y > 0)
+                {
+                    Avanzar();
+                }
+                else
+                {
+                    Retroceder();
+                }
+            }
+        }
     }
+
+    // Métodos de movimiento y rotación
 
     public void ActualizarPosicion()
     {
-        if (!vivo)
-        {
-            return;
-        }
+        if (!vivo) return;
+
         posObjetivo = new Vector3(lateral, 0, posicionZ);
         transform.position = posObjetivo;
     }
 
     public void Avanzar()
     {
-        if (!vivo)
-        {
-            return;
-        }
-        grafico.eulerAngles = Vector3.zero;
-        if (MirarAdelante())
-        {
-            return;
-        }
+        if (!vivo || MirarAdelante()) return;
 
         posicionZ += distanciaSaltoZ;
+        ActualizarRotacion(Vector3.forward);
         if (posicionZ > carril)
         {
             carril = posicionZ;
             mundo.CrearPisos();
         }
+        pasos++;
     }
 
     public void Retroceder()
     {
-        if (!vivo)
-        {
-            return;
-        }
-        grafico.eulerAngles = new Vector3(0, 180, 0);
-        if (MirarAdelante())
-        {
-            return;
-        }
+        if (!vivo || posicionZ <= carril - 3 * distanciaSaltoZ || MirarAdelante()) return;
 
-        if (posicionZ > carril - 3 * distanciaSaltoZ)
-        {
-            posicionZ-= distanciaSaltoZ;
-        }
+        posicionZ -= distanciaSaltoZ;
+        ActualizarRotacion(Vector3.back);
+        pasos++;
     }
-    public void MoverLados(int cuanto)
-    {
-        if (!vivo)
-        {
-            return;
-        }
-        grafico.rotation = Quaternion.Euler(0, 90 * Mathf.Sign(cuanto), 0);
-        if (MirarAdelante())
-        {
-            return;
-        }
 
-        lateral += cuanto;
-        lateral = Mathf.Clamp(lateral, -15, 15);
+    public void MoverLados(int cuanto)
+{
+    if (!vivo)
+    {
+        return;
+    }
+
+    grafico.rotation = Quaternion.Euler(0, 90 * Mathf.Sign(cuanto), 0); // Permitir siempre la rotación
+
+    // Comprobar obstáculos solo para movimiento hacia adelante o hacia atrás
+    if (MirarAdelante() && (cuanto == distanciaSaltoLateral || cuanto == -distanciaSaltoLateral))
+    {
+        return;
+    }
+
+    lateral += cuanto;
+    lateral = Mathf.Clamp(lateral, -15, 15);
+    pasos++;
+}
+
+    private void ActualizarRotacion(Vector3 direccion)
+    {
+        Quaternion targetRotation = Quaternion.LookRotation(direccion);
+    grafico.rotation = targetRotation; // Aplica la rotación directamente
     }
 
     public bool MirarAdelante()
     {
         RaycastHit hit;
-        Ray rayo = new Ray(grafico.position + Vector3.up * 5f, grafico.forward);
-
-        if (Physics.Raycast(rayo, out hit, distanciaVista, capaObstacles))
-        {
-            return true;
-        }
-        return false;
+    Ray rayo = new Ray(grafico.position + Vector3.up * 5f, grafico.forward);
+    bool isHit = Physics.Raycast(rayo, out hit, distanciaVista, capaObstacles);
+    if (isHit) {
+        Debug.Log("Hit: " + hit.collider.name);
+    }
+    return isHit;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Coche"))
-        {
-            vivo = false;
-        }
+        if (other.CompareTag("Coche")) vivo = false;
     }
 
     public void MirarAbajo()
     {
         RaycastHit hit;
         Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
-
-        if (Physics.Raycast(rayo, out hit, 3, capaAgua))
-        {
-            if (hit.collider.CompareTag("Agua"))
-            {
-                vivo = false;
-            }
-        }
+        if (Physics.Raycast(rayo, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua")) vivo = false;
     }
-}
+}                   
