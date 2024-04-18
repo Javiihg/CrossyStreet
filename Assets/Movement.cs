@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class Movement : MonoBehaviour
 {
@@ -23,11 +25,13 @@ public class Movement : MonoBehaviour
     private float minSwipeDistance = 50f; // La distancia mínima para considerar un movimiento como un deslizamiento
     private int posicionZ;
     public int pasos = 0;
+    public TextMeshProUGUI textoPasos;
 
     void Start()
     {
         distanciaSaltoLateral = distanciaSaltoZ;
         InvokeRepeating("MirarAbajo", 1, 0.5f);
+        textoPasos.gameObject.SetActive(false);
     }
 
     void Update()
@@ -68,6 +72,7 @@ public class Movement : MonoBehaviour
             isSwiping = false;
         }
     }
+    
 
     void OnDrawGizmos()
 {
@@ -120,8 +125,8 @@ public class Movement : MonoBehaviour
         {
             carril = posicionZ;
             mundo.CrearPisos();
+            pasos++;
         }
-        pasos++;
     }
 
     public void Retroceder()
@@ -130,7 +135,6 @@ public class Movement : MonoBehaviour
 
         posicionZ -= distanciaSaltoZ;
         ActualizarRotacion(Vector3.back);
-        pasos++;
     }
 
     public void MoverLados(int cuanto)
@@ -150,7 +154,6 @@ public class Movement : MonoBehaviour
 
     lateral += cuanto;
     lateral = Mathf.Clamp(lateral, -15, 15);
-    pasos++;
 }
 
     private void ActualizarRotacion(Vector3 direccion)
@@ -172,13 +175,27 @@ public class Movement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Coche")) vivo = false;
+        if ((other.CompareTag("Coche") || other.CompareTag("Agua")) && vivo)
+    {
+        vivo = false;
+        MostrarPasosFinales();
+    }
     }
 
     public void MirarAbajo()
     {
         RaycastHit hit;
-        Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
-        if (Physics.Raycast(rayo, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua")) vivo = false;
+    Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
+    if (Physics.Raycast(rayo, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua") && vivo)
+    {
+        vivo = false;
+        MostrarPasosFinales();
+    }
+    }
+
+    private void MostrarPasosFinales()
+    {
+        textoPasos.text = "Pasos totales: " + pasos.ToString();
+    textoPasos.gameObject.SetActive(true); // Activa el objeto de texto para mostrar los pasos
     }
 }                   
