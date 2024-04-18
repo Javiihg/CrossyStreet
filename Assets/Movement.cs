@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class Movement : MonoBehaviour
 {
@@ -26,12 +27,14 @@ public class Movement : MonoBehaviour
     private int posicionZ;
     public int pasos = 0;
     public TextMeshProUGUI textoPasos;
+    public GameObject botonReiniciar;
 
     void Start()
     {
         distanciaSaltoLateral = distanciaSaltoZ;
         InvokeRepeating("MirarAbajo", 1, 0.5f);
         textoPasos.gameObject.SetActive(false);
+        botonReiniciar.SetActive(false);
     }
 
     void Update()
@@ -71,6 +74,8 @@ public class Movement : MonoBehaviour
             ProcesarSwipe();
             isSwiping = false;
         }
+        textoPasos.gameObject.SetActive(false);
+        botonReiniciar.SetActive(false);
     }
     
 
@@ -175,27 +180,29 @@ public class Movement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if ((other.CompareTag("Coche") || other.CompareTag("Agua")) && vivo)
-    {
-        vivo = false;
+        if (other.CompareTag("Coche")) vivo = false;
         MostrarPasosFinales();
-    }
+        botonReiniciar.SetActive(true);
     }
 
     public void MirarAbajo()
     {
         RaycastHit hit;
-    Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
-    if (Physics.Raycast(rayo, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua") && vivo)
-    {
-        vivo = false;
+        Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
+        if (Physics.Raycast(rayo, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua")) vivo = false;
         MostrarPasosFinales();
-    }
+        botonReiniciar.SetActive(true);
     }
 
     private void MostrarPasosFinales()
     {
         textoPasos.text = "Pasos totales: " + pasos.ToString();
     textoPasos.gameObject.SetActive(true); // Activa el objeto de texto para mostrar los pasos
+    botonReiniciar.SetActive(true);
+    }
+
+    public void ReiniciarJuego()
+    {
+         SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Recarga la escena actual
     }
 }                   
