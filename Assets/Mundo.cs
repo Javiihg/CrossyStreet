@@ -7,7 +7,7 @@ public class Mundo : MonoBehaviour
     public int carril = 0;
     public GameObject[] pisos;
     public int pisosDiferencia;
-    public float longitudPiso = 1; // Assume each floor is 1 unit long, adjust if not
+    public float longitudPiso = 1; 
 
     public void Start()
     {

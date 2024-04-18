@@ -385,7 +385,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22b2d14301bfef7439bb34651da8c373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocidad: 20
+  velocidad: 10
 --- !u!1001 &5169126633648556395
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -531,7 +531,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22b2d14301bfef7439bb34651da8c373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocidad: 20
+  velocidad: 10
 --- !u!4 &3692979353835085776 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8429740621707810491, guid: 6dec64e1e08e2f742999406706f86d26,

@@ -8,7 +8,7 @@ public class Moneda : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            GameManager.Instance.AddMonedas(1); 
+            GameManager.Instance.AddCoins(1); 
             Destroy(gameObject); 
         }
     }

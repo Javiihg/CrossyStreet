@@ -1,13 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-    private int totalMonedas = 0;
 
-    void Awake()
+    public int Coins { get; private set; }
+    public TextMeshProUGUI coinText; // Referencia al texto de UI que muestra las monedas
+
+    private void Awake()
     {
         if (Instance == null)
         {
@@ -20,18 +23,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void AddMonedas(int amount)
+    public void AddCoins(int amount)
     {
-        totalMonedas += amount;
+        Coins += amount;
     }
 
-    public int GetTotalMonedas()
+    public void ResetCoins()
     {
-        return totalMonedas;
-    }
-
-    public void ResetMonedas()
-    {
-        totalMonedas = 0;
+        Coins = 0;
     }
 }

@@ -23,7 +23,7 @@ public class Movement : MonoBehaviour
     private Vector2 touchStartPos;
     private Vector2 touchEndPos;
     private bool isSwiping = false;
-    private float minSwipeDistance = 50f; // La distancia mínima para considerar un movimiento como un deslizamiento
+    private float minSwipeDistance = 50f; 
     private int posicionZ;
     public int pasos = 0;
     public TextMeshProUGUI textoPasos;
@@ -61,7 +61,7 @@ public class Movement : MonoBehaviour
             MoverLados(-distanciaSaltoLateral);
         }
 
-        // Detección de deslizamiento del ratón
+        // swipe raton
         if (Input.GetMouseButtonDown(0))
         {
             touchStartPos = Input.mousePosition;
@@ -90,12 +90,12 @@ public class Movement : MonoBehaviour
         {
             if (Mathf.Abs(swipeDelta.x) > Mathf.Abs(swipeDelta.y))
             {
-                // Deslizamiento lateral
+                // swipe lateral
                 MoverLados(Mathf.RoundToInt(Mathf.Sign(swipeDelta.x) * distanciaSaltoLateral));
             }
             else
             {
-                // Deslizamiento vertical
+                // swipe vertical
                 if (swipeDelta.y > 0)
                 {
                     Avanzar();
@@ -147,9 +147,9 @@ public class Movement : MonoBehaviour
         return;
     }
 
-    grafico.rotation = Quaternion.Euler(0, 90 * Mathf.Sign(cuanto), 0); // Permitir siempre la rotación
+    grafico.rotation = Quaternion.Euler(0, 90 * Mathf.Sign(cuanto), 0); // permitir rotacion
 
-    // Comprobar obstáculos solo para movimiento hacia adelante o hacia atrás
+    // comprobar obstáculos para movimiento
     if (MirarAdelante() && (cuanto == distanciaSaltoLateral || cuanto == -distanciaSaltoLateral))
     {
         return;
@@ -162,7 +162,7 @@ public class Movement : MonoBehaviour
     private void ActualizarRotacion(Vector3 direccion)
     {
         Quaternion targetRotation = Quaternion.LookRotation(direccion);
-    grafico.rotation = targetRotation; // Aplica la rotación directamente
+    grafico.rotation = targetRotation; // aplicar rotación directamente
     }
 
     public bool MirarAdelante()
@@ -178,31 +178,32 @@ public class Movement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if ((other.CompareTag("Coche") || other.CompareTag("Agua")) && vivo) {
+        if (other.CompareTag("Coche")) 
         vivo = false;
         MostrarPasosFinales();
-        botonReiniciar.SetActive(true);
     }
-}
 
-public void MirarAbajo() {
-    RaycastHit hit;
-    if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua") && vivo) {
+    public void MirarAbajo()
+    {
+        RaycastHit hit;
+        Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
+        if (Physics.Raycast(rayo, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua")) 
         vivo = false;
         MostrarPasosFinales();
-        botonReiniciar.SetActive(true);
     }
-}
 
     private void MostrarPasosFinales()
     {
-        textoPasos.text = "Pasos totales: " + pasos.ToString();
-    textoPasos.gameObject.SetActive(true); // Activa el objeto de texto para mostrar los pasos
-    botonReiniciar.SetActive(true);
+        if(!vivo)
+        {
+            textoPasos.text = "Pasos " + pasos.ToString() + "\nCoins " + GameManager.Instance.Coins;
+            textoPasos.gameObject.SetActive(true); 
+            botonReiniciar.SetActive(true); 
+        }
     }
 
     public void ReiniciarJuego()
     {
-         SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Recarga la escena actual
+         SceneManager.LoadScene(SceneManager.GetActiveScene().name); 
     }
-}                   
+}      
