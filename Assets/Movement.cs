@@ -28,6 +28,7 @@ public class Movement : MonoBehaviour
     public int pasos = 0;
     public TextMeshProUGUI textoPasos;
     public GameObject botonReiniciar;
+    public GameObject background;
 
     void Start()
     {
@@ -35,6 +36,8 @@ public class Movement : MonoBehaviour
         InvokeRepeating("MirarAbajo", 1, 0.5f);
         textoPasos.gameObject.SetActive(false);
         botonReiniciar.SetActive(false);
+        background.SetActive(false);
+        Debug.Log("Record: " + PlayerPrefs.GetInt("Record", 0));
     }
 
     void Update()
@@ -196,9 +199,16 @@ public class Movement : MonoBehaviour
     {
         if(!vivo)
         {
+            int recordPasos = PlayerPrefs.GetInt("Record", 0);
+            if (pasos > recordPasos)
+            {
+                PlayerPrefs.SetInt("Record", pasos);
+                PlayerPrefs.Save();
+            }
             textoPasos.text = "Pasos " + pasos.ToString() + "\nCoins " + GameManager.Instance.Coins;
             textoPasos.gameObject.SetActive(true); 
             botonReiniciar.SetActive(true); 
+            background.SetActive(true);
         }
     }
 
