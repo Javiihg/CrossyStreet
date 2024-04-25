@@ -29,6 +29,8 @@ public class Movement : MonoBehaviour
     public TextMeshProUGUI textoPasos;
     public GameObject botonReiniciar;
     public GameObject background;
+    public GameObject botonSalir;
+    public AnimationCurve curve;
 
     void Start()
     {
@@ -37,6 +39,7 @@ public class Movement : MonoBehaviour
         textoPasos.gameObject.SetActive(false);
         botonReiniciar.SetActive(false);
         background.SetActive(false);
+        botonSalir.SetActive(false);
         Debug.Log("Record: " + PlayerPrefs.GetInt("Record", 0));
     }
 
@@ -121,6 +124,18 @@ public class Movement : MonoBehaviour
         transform.position = posObjetivo;
     }
 
+    public IEnumerator CambiarPosicion()
+    {
+        posObjetivo = new Vector3(lateral, 0, posicionZ);
+        Vector3 posActual = transform.position;
+
+        for (int i =0; i < 10; i++)
+        {
+            transform.position = Vector3.Lerp(posActual, posObjetivo, i * 0.1f) + Vector3.up * curve.Evaluate(i * 0.1f);
+            yield return new WaitForSeconds(1f / velocidad);
+        }
+    }
+
     public void Avanzar()
     {
         if (!vivo || MirarAdelante()) return;
@@ -133,6 +148,7 @@ public class Movement : MonoBehaviour
             mundo.CrearPisos();
             pasos++;
         }
+        StartCoroutine(CambiarPosicion());
     }
 
     public void Retroceder()
@@ -141,6 +157,7 @@ public class Movement : MonoBehaviour
 
         posicionZ -= distanciaSaltoZ;
         ActualizarRotacion(Vector3.back);
+        StartCoroutine(CambiarPosicion());
     }
 
     public void MoverLados(int cuanto)
@@ -160,6 +177,7 @@ public class Movement : MonoBehaviour
 
     lateral += cuanto;
     lateral = Mathf.Clamp(lateral, -15, 15);
+    StartCoroutine(CambiarPosicion());
 }
 
     private void ActualizarRotacion(Vector3 direccion)
@@ -205,10 +223,11 @@ public class Movement : MonoBehaviour
                 PlayerPrefs.SetInt("Record", pasos);
                 PlayerPrefs.Save();
             }
-            textoPasos.text = "Pasos " + pasos.ToString() + "\nCoins " + GameManager.Instance.Coins;
+            textoPasos.text = "Score " + pasos.ToString() + "\nCoins " + GameManager.Instance.Coins;
             textoPasos.gameObject.SetActive(true); 
             botonReiniciar.SetActive(true); 
             background.SetActive(true);
+            botonSalir.SetActive(true);
         }
     }
 
@@ -216,4 +235,9 @@ public class Movement : MonoBehaviour
     {
          SceneManager.LoadScene(SceneManager.GetActiveScene().name); 
     }
-}      
+
+    public void SalirMenu()
+    {
+        SceneManager.LoadScene("MenuInicial");
+    }
+}
