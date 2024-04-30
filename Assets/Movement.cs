@@ -27,20 +27,24 @@ public class Movement : MonoBehaviour
     private int posicionZ;
     public int pasos = 0;
     public TextMeshProUGUI textoPasos;
+    public TextMeshProUGUI textoRecord;
     public GameObject botonReiniciar;
     public GameObject background;
     public GameObject botonSalir;
     public AnimationCurve curve;
+    public Animator animaciones;
 
     void Start()
     {
         distanciaSaltoLateral = distanciaSaltoZ;
         InvokeRepeating("MirarAbajo", 1, 0.5f);
         textoPasos.gameObject.SetActive(false);
+        textoRecord.gameObject.SetActive(false);
         botonReiniciar.SetActive(false);
         background.SetActive(false);
         botonSalir.SetActive(false);
         Debug.Log("Record: " + PlayerPrefs.GetInt("Record", 0));
+        MostrarRecord();
     }
 
     void Update()
@@ -153,7 +157,7 @@ public class Movement : MonoBehaviour
 
     public void Retroceder()
     {
-        if (!vivo || posicionZ <= carril - 3 * distanciaSaltoZ || MirarAdelante()) return;
+        if (!vivo || posicionZ <= carril - 1 * distanciaSaltoZ || MirarAdelante()) return;
 
         posicionZ -= distanciaSaltoZ;
         ActualizarRotacion(Vector3.back);
@@ -176,7 +180,7 @@ public class Movement : MonoBehaviour
     }
 
     lateral += cuanto;
-    lateral = Mathf.Clamp(lateral, -15, 15);
+    lateral = Mathf.Clamp(lateral, -20, 20);
     StartCoroutine(CambiarPosicion());
 }
 
@@ -199,9 +203,12 @@ public class Movement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Coche")) 
-        vivo = false;
-        MostrarPasosFinales();
+        if (other.CompareTag("Coche"))
+        {
+            animaciones.SetTrigger("morir");
+            vivo = false;
+            MostrarPasosFinales();
+        }
     }
 
     public void MirarAbajo()
@@ -209,9 +216,19 @@ public class Movement : MonoBehaviour
         RaycastHit hit;
         Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
         if (Physics.Raycast(rayo, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua")) 
-        vivo = false;
-        MostrarPasosFinales();
+        {
+            animaciones.SetTrigger("agua");
+            vivo = false;
+            MostrarPasosFinales();
+        }
     }
+
+    private void MostrarRecord()
+    {
+        int recordPasos = PlayerPrefs.GetInt("Record", 0);
+        textoRecord.text = "Record: " + recordPasos;
+    }
+
 
     private void MostrarPasosFinales()
     {
@@ -222,17 +239,19 @@ public class Movement : MonoBehaviour
             {
                 PlayerPrefs.SetInt("Record", pasos);
                 PlayerPrefs.Save();
+                MostrarRecord();
             }
             textoPasos.text = "Score " + pasos.ToString() + "\nCoins " + GameManager.Instance.Coins;
             textoPasos.gameObject.SetActive(true); 
             botonReiniciar.SetActive(true); 
             background.SetActive(true);
             botonSalir.SetActive(true);
+            textoRecord.gameObject.SetActive(true);
         }
     }
-
     public void ReiniciarJuego()
     {
+         GameManager.Instance.ResetCoins();
          SceneManager.LoadScene(SceneManager.GetActiveScene().name); 
     }
 

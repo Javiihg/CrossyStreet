@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: a7e4a302d5d9d554db47b2f20bad2971, type: 3}
       propertyPath: m_TagString
-      value: Arbol
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: a7e4a302d5d9d554db47b2f20bad2971, type: 3}
       propertyPath: m_LocalPosition.x
@@ -106,5 +106,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.05900798, y: 0.054431025, z: 0.120854646}
-  m_Center: {x: -0.0016253674, y: 0, z: 0.0558405}
+  m_Size: {x: 0.07151209, y: 0.05672083, z: 0.120854646}
+  m_Center: {x: -0.0013267803, y: -0.0011449027, z: 0.0558405}
