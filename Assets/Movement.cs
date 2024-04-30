@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class Movement : MonoBehaviour
 {
+    private Rigidbody rb;
      public int carril;
     public int lateral;
     public Vector3 posObjetivo;
@@ -36,6 +37,7 @@ public class Movement : MonoBehaviour
 
     void Start()
     {
+        rb = GetComponent<Rigidbody>();
         distanciaSaltoLateral = distanciaSaltoZ;
         InvokeRepeating("MirarAbajo", 1, 0.5f);
         textoPasos.gameObject.SetActive(false);
@@ -203,11 +205,33 @@ public class Movement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (other.CompareTag("Tronco"))
+        {
+            Debug.Log("tocar tronco");
+            this.transform.SetParent(other.transform);
+            if (rb != null)
+            {
+                rb.isKinematic = true;
+            }
+        }
         if (other.CompareTag("Coche"))
         {
             animaciones.SetTrigger("morir");
             vivo = false;
             MostrarPasosFinales();
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Tronco"))
+        {
+            Debug.Log("salir tronco");
+            this.transform.SetParent(null);
+            if (rb != null)
+            {
+                rb.isKinematic = false;
+            }
         }
     }
 
