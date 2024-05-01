@@ -39,6 +39,7 @@ public class Movement : MonoBehaviour
     private bool sonidoLose = false;
     public CoinCounterUI coinCounterUI;
     private bool movimientoRealizado = false;
+    public GameObject recordPanel;
 
     void Start()
     {
@@ -306,15 +307,21 @@ private bool EsObstaculoALado(int nuevaLateral)
 
     public void MirarAbajo()
     {
-        RaycastHit hit;
-        Ray rayo = new Ray(transform.position + Vector3.up, Vector3.down);
-        if (Physics.Raycast(rayo, out hit, 3, capaAgua) && hit.collider.CompareTag("Agua")) 
-        {
-            animaciones.SetTrigger("agua");
-            vivo = false;
-            MostrarPasosFinales();
-        }
+        // Solo verificar el agua si el personaje no está sobre un tronco.
+    if (transform.parent != null && transform.parent.CompareTag("Tronco"))
+    {
+        return; // No hacer nada si el personaje está sobre un tronco.
     }
+
+    RaycastHit hit;
+    Ray rayo = new Ray(transform.position + Vector3.up * 0.5f, Vector3.down); // Ajusta la altura de inicio del rayo si es necesario.
+    if (Physics.Raycast(rayo, out hit, 2f, capaAgua) && hit.collider.CompareTag("Agua")) // Ajusta la longitud del rayo si es necesario.
+    {
+        animaciones.SetTrigger("agua");
+        vivo = false;
+        MostrarPasosFinales();
+    }
+}
 
     private void MostrarRecord()
     {
@@ -324,29 +331,30 @@ private bool EsObstaculoALado(int nuevaLateral)
 
 
     private void MostrarPasosFinales()
+{
+    if (!vivo)
     {
-        if(!vivo)
+        if (!sonidoLose)
         {
-            if (!sonidoLose)
-            {
-                AudioManager.Instance.PlaySound(loseSound);
-                sonidoLose = true;
-            }
-            int recordPasos = PlayerPrefs.GetInt("Record", 0);
-            if (pasos > recordPasos)
-            {
-                PlayerPrefs.SetInt("Record", pasos);
-                PlayerPrefs.Save();
-                MostrarRecord();
-            }
-            textoPasos.text = "Score " + pasos.ToString() + "\nCoins " + GameManager.Instance.Coins;
-            textoPasos.gameObject.SetActive(true); 
-            botonReiniciar.SetActive(true); 
-            background.SetActive(true);
-            botonSalir.SetActive(true);
-            textoRecord.gameObject.SetActive(true);
+            AudioManager.Instance.PlaySound(loseSound);
+            sonidoLose = true;
         }
+        int recordPasos = PlayerPrefs.GetInt("Record", 0);
+        if (pasos > recordPasos)
+        {
+            PlayerPrefs.SetInt("Record", pasos);
+            PlayerPrefs.Save();
+            MostrarRecord();
+            recordPanel.SetActive(true);  // Activar el panel cuando se supera el récord
+        }
+        textoPasos.text = "Score " + pasos.ToString() + "\nCoins " + GameManager.Instance.Coins;
+        textoPasos.gameObject.SetActive(true);
+        botonReiniciar.SetActive(true);
+        background.SetActive(true);
+        botonSalir.SetActive(true);
+        textoRecord.gameObject.SetActive(true);
     }
+}
     public void ReiniciarJuego()
     {
          GameManager.Instance.ResetCoins();

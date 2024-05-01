@@ -6,72 +6,42 @@ public class Pool : MonoBehaviour
 {
     public static Pool Instance;
 
-    [System.Serializable]
-    public struct PoolData  // Renamed to avoid confusion with the class name
-    {
-        public string tag;
-        public GameObject prefab;
-        public int size;
-    }
+    [SerializeField] private GameObject prefab;
+    [SerializeField] private int initialPoolSize = 10;
 
-    public List<PoolData> pools;  // Correctly typed list
-    private Dictionary<string, Queue<GameObject>> poolDictionary;
+    private Queue<GameObject> objects = new Queue<GameObject>();
 
     private void Awake()
     {
         Instance = this;
-        InitializePools();
-    }
 
-    private void InitializePools()
-    {
-        poolDictionary = new Dictionary<string, Queue<GameObject>>();
-
-        foreach (PoolData pool in pools)  // Using the corrected struct type
+        // Inicializa el pool
+        for (int i = 0; i < initialPoolSize; i++)
         {
-            Queue<GameObject> objectPool = new Queue<GameObject>();
-
-            for (int i = 0; i < pool.size; i++)
-            {
-                GameObject obj = Instantiate(pool.prefab);
-                obj.SetActive(false);
-                objectPool.Enqueue(obj);
-            }
-
-            poolDictionary.Add(pool.tag, objectPool);
+            GameObject newObject = Instantiate(prefab);
+            newObject.SetActive(false);
+            objects.Enqueue(newObject);
         }
     }
 
-    public GameObject GetPiso(string tag)
+    public GameObject GetObject()
     {
-        if (!poolDictionary.ContainsKey(tag))
+        if (objects.Count == 0)
         {
-            Debug.LogWarning("Pool with tag " + tag + " doesn't exist.");
-            return null;
+            // Si no hay objetos disponibles, crea uno nuevo
+            GameObject newObject = Instantiate(prefab);
+            newObject.SetActive(false);
+            return newObject;
         }
 
-        if (poolDictionary[tag].Count > 0)
-        {
-            GameObject obj = poolDictionary[tag].Dequeue();
-            obj.SetActive(true);
-            return obj;
-        }
-        else
-        {
-            Debug.Log("Pool " + tag + " is empty!");
-            return null;
-        }
+        GameObject objectToReuse = objects.Dequeue();
+        objectToReuse.SetActive(true);
+        return objectToReuse;
     }
 
-    public void ReturnPiso(string tag, GameObject piso)
+    public void ReturnObject(GameObject objectToReturn)
     {
-        if (!poolDictionary.ContainsKey(tag))
-        {
-            Debug.LogWarning("Pool with tag " + tag + " doesn't exist.");
-            return;
-        }
-
-        piso.SetActive(false);
-        poolDictionary[tag].Enqueue(piso);
+        objectToReturn.SetActive(false);
+        objects.Enqueue(objectToReturn);
     }
 }

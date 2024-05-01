@@ -23,7 +23,7 @@ public class CoinCounterUI : MonoBehaviour
 
     public void UpdateCoinCount(int count)
     {
-        coinText.text = "Monedas: " + count;
+        coinText.text = " " + count;
         ShowAndFade();
     }
 
@@ -41,6 +41,8 @@ public class CoinCounterUI : MonoBehaviour
         LeanTween.cancel(coinText.gameObject);
 
         // Aplica una animación para desvanecer el texto
-        LeanTween.alphaCanvas(canvasGroup, 0, 1).setDelay(1); // Desvanece el texto después de 1 segundo
+        LeanTween.alphaCanvas(canvasGroup, 0, 1).setDelay(1).setOnComplete(() => {
+            coinText.gameObject.SetActive(false); // Desactiva el objeto de texto una vez completada la animación
+        });
     }
 }
