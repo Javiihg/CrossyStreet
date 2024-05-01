@@ -4,44 +4,62 @@ using UnityEngine;
 
 public class Pool : MonoBehaviour
 {
+    [System.Serializable]
+    public class PoolItem
+    {
+        public string tag;
+        public GameObject prefab;
+        public int size;
+    }
+
     public static Pool Instance;
 
-    [SerializeField] private GameObject prefab;
-    [SerializeField] private int initialPoolSize = 10;
-
-    private Queue<GameObject> objects = new Queue<GameObject>();
+    [SerializeField]
+    private List<PoolItem> items; // Lista para configurar en el inspector
+    private Dictionary<string, Queue<GameObject>> poolDictionary;
 
     private void Awake()
     {
         Instance = this;
+        poolDictionary = new Dictionary<string, Queue<GameObject>>();
 
-        // Inicializa el pool
-        for (int i = 0; i < initialPoolSize; i++)
+        foreach (PoolItem item in items)
         {
-            GameObject newObject = Instantiate(prefab);
-            newObject.SetActive(false);
-            objects.Enqueue(newObject);
+            Queue<GameObject> objectQueue = new Queue<GameObject>();
+
+            for (int i = 0; i < item.size; i++)
+            {
+                GameObject obj = Instantiate(item.prefab);
+                obj.SetActive(false);
+                objectQueue.Enqueue(obj);
+            }
+
+            poolDictionary.Add(item.tag, objectQueue);
         }
     }
 
-    public GameObject GetObject()
+    public GameObject GetObject(string tag)
     {
-        if (objects.Count == 0)
+        if (!poolDictionary.ContainsKey(tag))
         {
-            // Si no hay objetos disponibles, crea uno nuevo
-            GameObject newObject = Instantiate(prefab);
-            newObject.SetActive(false);
-            return newObject;
+            Debug.LogWarning("Pool with tag " + tag + " doesn't exist.");
+            return null;
         }
 
-        GameObject objectToReuse = objects.Dequeue();
+        GameObject objectToReuse = poolDictionary[tag].Count > 0 ? poolDictionary[tag].Dequeue() : Instantiate(poolDictionary[tag].Peek()); 
         objectToReuse.SetActive(true);
         return objectToReuse;
     }
 
-    public void ReturnObject(GameObject objectToReturn)
+    public void ReturnObject(GameObject objectToReturn, string tag)
     {
+        if (!poolDictionary.ContainsKey(tag))
+        {
+            Debug.LogWarning("Pool with tag " + tag + " doesn't exist.");
+            return;
+        }
+        
         objectToReturn.SetActive(false);
-        objects.Enqueue(objectToReturn);
+        poolDictionary[tag].Enqueue(objectToReturn);
     }
 }

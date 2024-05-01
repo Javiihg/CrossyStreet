@@ -35,14 +35,14 @@ public class CoinCounterUI : MonoBehaviour
         {
             canvasGroup = coinText.gameObject.AddComponent<CanvasGroup>();
         }
-        canvasGroup.alpha = 1; // Asegura que el texto es totalmente visible
+        canvasGroup.alpha = 1;
 
-        // Cancela cualquier animación previa que pudiera estar ejecutándose
+        
         LeanTween.cancel(coinText.gameObject);
 
         // Aplica una animación para desvanecer el texto
         LeanTween.alphaCanvas(canvasGroup, 0, 1).setDelay(1).setOnComplete(() => {
-            coinText.gameObject.SetActive(false); // Desactiva el objeto de texto una vez completada la animación
+            coinText.gameObject.SetActive(false); 
         });
     }
 }

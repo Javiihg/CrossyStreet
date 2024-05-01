@@ -73,14 +73,14 @@ public class Movement : MonoBehaviour
         isSwiping = false;  // Reiniciar la detección de swipe
     }
 
-    // Verificar movimiento continuo del mouse o toque en pantalla
+    
     if (Input.GetMouseButton(0))
     {
         touchEndPos = Input.mousePosition;
         if (!isSwiping && (touchEndPos - touchStartPos).magnitude > minSwipeDistance)
         {
             isSwiping = true;
-            ProcesarSwipe();  // Procesa el swipe directamente aquí
+            ProcesarSwipe();  
         }
     }
 
@@ -89,13 +89,13 @@ public class Movement : MonoBehaviour
     {
         if (!isSwiping && (touchEndPos - touchStartPos).magnitude < minSwipeDistance)
         {
-            Avanzar();  // Avanzar solo si no fue un swipe y el movimiento fue mínimo
+            Avanzar();  
         }
-        isSwiping = false;  // Restablecer la detección de swipe
+        isSwiping = false;  
     }
 
     // Teclas de movimiento por teclado
-    if (!movimientoRealizado)  // Permite teclas de movimiento si no se ha realizado un toque o swipe
+    if (!movimientoRealizado)  
     {
         CheckKeyboardInputs();
     }
@@ -219,7 +219,7 @@ private bool EsObstaculoALado(int nuevaLateral)
 {
     Vector3 direccion = (nuevaLateral > lateral) ? Vector3.right : Vector3.left;
     RaycastHit hit;
-    Vector3 origen = transform.position + Vector3.up * 1.0f; // Ajusta esta altura según la configuración de tus colliders
+    Vector3 origen = transform.position + Vector3.up * 1.0f; 
     if (Physics.Raycast(origen, direccion, out hit, distanciaSaltoLateral, capaObstacles))
     {
         Debug.DrawRay(origen, direccion * distanciaSaltoLateral, Color.red);
@@ -241,10 +241,10 @@ private bool EsObstaculoALado(int nuevaLateral)
     public bool MirarAdelante()
 {
     RaycastHit hit;
-    // Asegura que el rayo empiece justo delante del personaje para evitar colisiones inmediatas
-    Vector3 start = transform.position + Vector3.up * 0.5f; // Ajusta esta altura según la altura de tu personaje
+    
+    Vector3 start = transform.position + Vector3.up * 0.5f; 
     Vector3 direction = transform.forward;
-    float checkDistance = distanciaSaltoZ; // o la distancia que prefieras para detectar obstáculos
+    float checkDistance = distanciaSaltoZ; 
 
     Debug.DrawRay(start, direction * checkDistance, Color.green);
 
@@ -258,7 +258,7 @@ private bool EsObstaculoALado(int nuevaLateral)
     public bool MirarAtras()
 {
     RaycastHit hit;
-    Vector3 start = grafico.position + Vector3.up * 1.5f; // Ajusta la altura según la posición y tamaño del personaje
+    Vector3 start = grafico.position + Vector3.up * 1.5f; 
     Ray rayo = new Ray(start, -grafico.forward);  // Revisa hacia atrás
     bool isHit = Physics.Raycast(rayo, out hit, distanciaVista, capaObstacles);
     Debug.DrawRay(start, -grafico.forward * distanciaVista, Color.red);
@@ -310,12 +310,12 @@ private bool EsObstaculoALado(int nuevaLateral)
         // Solo verificar el agua si el personaje no está sobre un tronco.
     if (transform.parent != null && transform.parent.CompareTag("Tronco"))
     {
-        return; // No hacer nada si el personaje está sobre un tronco.
+        return; 
     }
 
     RaycastHit hit;
-    Ray rayo = new Ray(transform.position + Vector3.up * 0.5f, Vector3.down); // Ajusta la altura de inicio del rayo si es necesario.
-    if (Physics.Raycast(rayo, out hit, 2f, capaAgua) && hit.collider.CompareTag("Agua")) // Ajusta la longitud del rayo si es necesario.
+    Ray rayo = new Ray(transform.position + Vector3.up * 0.5f, Vector3.down); 
+    if (Physics.Raycast(rayo, out hit, 2f, capaAgua) && hit.collider.CompareTag("Agua")) 
     {
         animaciones.SetTrigger("agua");
         vivo = false;
@@ -345,7 +345,7 @@ private bool EsObstaculoALado(int nuevaLateral)
             PlayerPrefs.SetInt("Record", pasos);
             PlayerPrefs.Save();
             MostrarRecord();
-            recordPanel.SetActive(true);  // Activar el panel cuando se supera el récord
+            recordPanel.SetActive(true);  
         }
         textoPasos.text = "Score " + pasos.ToString() + "\nCoins " + GameManager.Instance.Coins;
         textoPasos.gameObject.SetActive(true);
