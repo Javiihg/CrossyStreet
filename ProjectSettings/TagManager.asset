@@ -8,6 +8,7 @@ TagManager:
   - Agua
   - Tronco
   - Arbol
+  - Moneda
   layers:
   - Default
   - TransparentFX

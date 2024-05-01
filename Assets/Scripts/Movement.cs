@@ -273,7 +273,7 @@ private bool EsObstaculoALado(int nuevaLateral)
         if (other.CompareTag("Tronco"))
         {
             Debug.Log("tocar tronco");
-            this.transform.SetParent(other.transform);
+            this.transform.SetParent(other.transform, true);
             if (rb != null)
             {
                 rb.isKinematic = true;
