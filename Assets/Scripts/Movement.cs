@@ -18,7 +18,7 @@ public class Movement : MonoBehaviour
     public Transform grafico;
     public LayerMask capaObstacles;
     public LayerMask capaAgua;
-    public float distanciaVista = 5;
+    public float distanciaVista = 2;
     public bool vivo = true;
 
     private Vector2 touchStartPos;
@@ -34,6 +34,11 @@ public class Movement : MonoBehaviour
     public GameObject botonSalir;
     public AnimationCurve curve;
     public Animator animaciones;
+    public AudioClip movementSound;
+    public AudioClip loseSound;
+    private bool sonidoLose = false;
+    public CoinCounterUI coinCounterUI;
+    private bool movimientoRealizado = false;
 
     void Start()
     {
@@ -47,46 +52,73 @@ public class Movement : MonoBehaviour
         botonSalir.SetActive(false);
         Debug.Log("Record: " + PlayerPrefs.GetInt("Record", 0));
         MostrarRecord();
+        if (coinCounterUI != null)
+{
+    coinCounterUI.gameObject.SetActive(false);
+}
     }
 
     void Update()
     {
         if (!vivo) return;
 
-        ActualizarPosicion();
+    // Resetear el flag al comienzo de cada actualización
+    movimientoRealizado = false;
 
-        // Teclas de movimiento
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            Avanzar();
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            Retroceder();
-        }
-        else if(Input.GetKeyDown(KeyCode.D))
-        {
-            MoverLados(distanciaSaltoLateral);
-        }
-        else if (Input.GetKeyDown(KeyCode.A))
-        {
-            MoverLados(-distanciaSaltoLateral);
-        }
+    // Detectar inicio de toque/clic
+    if (Input.GetMouseButtonDown(0))
+    {
+        touchStartPos = Input.mousePosition;
+        isSwiping = false;  // Reiniciar la detección de swipe
+    }
 
-        // swipe raton
-        if (Input.GetMouseButtonDown(0))
+    // Verificar movimiento continuo del mouse o toque en pantalla
+    if (Input.GetMouseButton(0))
+    {
+        touchEndPos = Input.mousePosition;
+        if (!isSwiping && (touchEndPos - touchStartPos).magnitude > minSwipeDistance)
         {
-            touchStartPos = Input.mousePosition;
             isSwiping = true;
-        }
-
-        if (Input.GetMouseButtonUp(0) && isSwiping)
-        {
-            touchEndPos = Input.mousePosition;
-            ProcesarSwipe();
-            isSwiping = false;
+            ProcesarSwipe();  // Procesa el swipe directamente aquí
         }
     }
+
+    // Al soltar el botón del mouse o levantar el dedo
+    if (Input.GetMouseButtonUp(0))
+    {
+        if (!isSwiping && (touchEndPos - touchStartPos).magnitude < minSwipeDistance)
+        {
+            Avanzar();  // Avanzar solo si no fue un swipe y el movimiento fue mínimo
+        }
+        isSwiping = false;  // Restablecer la detección de swipe
+    }
+
+    // Teclas de movimiento por teclado
+    if (!movimientoRealizado)  // Permite teclas de movimiento si no se ha realizado un toque o swipe
+    {
+        CheckKeyboardInputs();
+    }
+}
+
+private void CheckKeyboardInputs()
+{
+    if (Input.GetKeyDown(KeyCode.W))
+    {
+        Avanzar();
+    }
+    else if (Input.GetKeyDown(KeyCode.S))
+    {
+        Retroceder();
+    }
+    else if(Input.GetKeyDown(KeyCode.D))
+    {
+        MoverLados(distanciaSaltoLateral);
+    }
+    else if (Input.GetKeyDown(KeyCode.A))
+    {
+        MoverLados(-distanciaSaltoLateral);
+    }
+}
     
 
     void OnDrawGizmos()
@@ -117,6 +149,7 @@ public class Movement : MonoBehaviour
                     Retroceder();
                 }
             }
+            movimientoRealizado = true;
         }
     }
 
@@ -148,42 +181,54 @@ public class Movement : MonoBehaviour
 
         posicionZ += distanciaSaltoZ;
         ActualizarRotacion(Vector3.forward);
+        StartCoroutine(CambiarPosicion());
+        AudioManager.Instance.PlaySound(movementSound);
         if (posicionZ > carril)
         {
             carril = posicionZ;
             mundo.CrearPisos();
             pasos++;
         }
-        StartCoroutine(CambiarPosicion());
     }
 
     public void Retroceder()
     {
-        if (!vivo || posicionZ <= carril - 1 * distanciaSaltoZ || MirarAdelante()) return;
+        if (!vivo || posicionZ <= carril - 2 * distanciaSaltoZ || MirarAtras()) return;
 
         posicionZ -= distanciaSaltoZ;
         ActualizarRotacion(Vector3.back);
         StartCoroutine(CambiarPosicion());
+        AudioManager.Instance.PlaySound(movementSound);
     }
 
     public void MoverLados(int cuanto)
 {
-    if (!vivo)
-    {
-        return;
-    }
+    if (!vivo) return;
 
-    grafico.rotation = Quaternion.Euler(0, 90 * Mathf.Sign(cuanto), 0); // permitir rotacion
+    int nuevaLateral = lateral + cuanto;
+    if (EsObstaculoALado(nuevaLateral)) return; // Verifica si hay un obstáculo al lado antes de moverse
 
-    // comprobar obstáculos para movimiento
-    if (MirarAdelante() && (cuanto == distanciaSaltoLateral || cuanto == -distanciaSaltoLateral))
-    {
-        return;
-    }
-
-    lateral += cuanto;
-    lateral = Mathf.Clamp(lateral, -20, 20);
+    grafico.rotation = Quaternion.Euler(0, 90 * Mathf.Sign(cuanto), 0);
+    lateral = Mathf.Clamp(nuevaLateral, -20, 20);
     StartCoroutine(CambiarPosicion());
+    AudioManager.Instance.PlaySound(movementSound);
+}
+
+private bool EsObstaculoALado(int nuevaLateral)
+{
+    Vector3 direccion = (nuevaLateral > lateral) ? Vector3.right : Vector3.left;
+    RaycastHit hit;
+    Vector3 origen = transform.position + Vector3.up * 1.0f; // Ajusta esta altura según la configuración de tus colliders
+    if (Physics.Raycast(origen, direccion, out hit, distanciaSaltoLateral, capaObstacles))
+    {
+        Debug.DrawRay(origen, direccion * distanciaSaltoLateral, Color.red);
+        if (hit.collider != null)
+        {
+            Debug.Log("Obstáculo al lado: " + hit.collider.gameObject.name);
+            return true;
+        }
+    }
+    return false;
 }
 
     private void ActualizarRotacion(Vector3 direccion)
@@ -193,15 +238,35 @@ public class Movement : MonoBehaviour
     }
 
     public bool MirarAdelante()
+{
+    RaycastHit hit;
+    // Asegura que el rayo empiece justo delante del personaje para evitar colisiones inmediatas
+    Vector3 start = transform.position + Vector3.up * 0.5f; // Ajusta esta altura según la altura de tu personaje
+    Vector3 direction = transform.forward;
+    float checkDistance = distanciaSaltoZ; // o la distancia que prefieras para detectar obstáculos
+
+    Debug.DrawRay(start, direction * checkDistance, Color.green);
+
+    if (Physics.Raycast(start, direction, out hit, checkDistance, capaObstacles))
     {
-        RaycastHit hit;
-    Ray rayo = new Ray(grafico.position + Vector3.up * 5f, grafico.forward);
+        Debug.Log("Obstacle ahead: " + hit.collider.name);
+        return true;
+    }
+    return false;
+}
+    public bool MirarAtras()
+{
+    RaycastHit hit;
+    Vector3 start = grafico.position + Vector3.up * 1.5f; // Ajusta la altura según la posición y tamaño del personaje
+    Ray rayo = new Ray(start, -grafico.forward);  // Revisa hacia atrás
     bool isHit = Physics.Raycast(rayo, out hit, distanciaVista, capaObstacles);
+    Debug.DrawRay(start, -grafico.forward * distanciaVista, Color.red);
+
     if (isHit) {
-        Debug.Log("Hit: " + hit.collider.name);
+        Debug.Log("Obstacle behind: " + hit.collider.name);
     }
     return isHit;
-    }
+}
 
     private void OnTriggerEnter(Collider other)
     {
@@ -220,6 +285,10 @@ public class Movement : MonoBehaviour
             vivo = false;
             MostrarPasosFinales();
         }
+        if (other.CompareTag("Moneda") && coinCounterUI != null)
+{
+    coinCounterUI.UpdateCoinCount(GameManager.Instance.Coins);
+}
     }
 
     private void OnTriggerExit(Collider other)
@@ -258,6 +327,11 @@ public class Movement : MonoBehaviour
     {
         if(!vivo)
         {
+            if (!sonidoLose)
+            {
+                AudioManager.Instance.PlaySound(loseSound);
+                sonidoLose = true;
+            }
             int recordPasos = PlayerPrefs.GetInt("Record", 0);
             if (pasos > recordPasos)
             {
